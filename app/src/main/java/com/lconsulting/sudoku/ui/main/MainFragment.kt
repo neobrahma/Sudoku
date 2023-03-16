@@ -1,142 +1,102 @@
 package com.lconsulting.sudoku.ui.main
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.*
-import android.widget.RadioGroup
+import android.widget.Button
+import android.widget.TextView
 import androidx.annotation.IntDef
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.lconsulting.sudoku.MyApplication
 import com.lconsulting.sudoku.R
 import com.lconsulting.sudoku.data.SquareData
-import com.lconsulting.sudoku.data.SudokuData
 import com.lconsulting.sudoku.ui.view.SudokuView
-import com.lconsulting.sudoku.ui.view.TouchPadViewListener
 import kotlinx.android.synthetic.main.main_fragment.*
-import javax.inject.Inject
-
-@IntDef(MODE_INSERT, MODE_UPDATE, MODE_LIGHT)
-@Retention(AnnotationRetention.SOURCE)
-annotation class StateMode
-const val MODE_INSERT = 0
-const val MODE_UPDATE = 1
-const val MODE_LIGHT = 2
-
-@IntDef(PLAY, STOP)
-@Retention(AnnotationRetention.SOURCE)
-annotation class StateResolver
-const val PLAY = 0
-const val STOP = 1
 
 class MainFragment : Fragment() {
 
     companion object {
+
+        @IntDef(PLAY, STOP)
+        @Retention(AnnotationRetention.SOURCE)
+        annotation class StateResolver
+
+        const val PLAY = 0
+        const val STOP = 1
+
         fun newInstance() = MainFragment()
     }
 
     private lateinit var viewModel: SudokuViewModel
 
-    @Inject
-    lateinit var sudokuData: SudokuData
-
     @StateResolver
     private var statePlayer = PLAY
 
-    private var mIdGrid: Int = -1
-    private var mIdSquare: Int = -1
+    private var idGrid: Int = -1
+    private var idSquare: Int = -1
     private var isRepeat: Boolean = false
 
     private val onClickListener = View.OnClickListener { v ->
-        when (v.id) {
-            R.id.constraintLayout -> {
-                vTouchPad.close()
-            }
-            R.id.btnPlay -> {
-                if (statePlayer == STOP) {
-                    setRepeatMode(PLAY, R.drawable.baseline_play_arrow_black_24, false)
+        when (v) {
+            is Button -> {
+                if (idGrid == -1 && idSquare == -1) {
+                    sudoku.unEnlightenedValue()
+                    sudoku.enlightenedValue(v.text.toString().toInt())
+                    tvState.text = resources.getString(R.string.insert_a_value)
                 } else {
-                    viewModel.startAlgo()
+                    viewModel.insertValueByUser(v.text.toString(), idGrid, idSquare)
+                    enableDigitsButton(true)
+                    idGrid = -1
+                    idSquare = -1
                 }
             }
-            R.id.btnRepeat -> {
-                setRepeatMode(STOP, R.drawable.baseline_stop_black_24, true)
-                viewModel.startAlgo()
+            else -> when (v.id) {
+                R.id.main -> {
+                    sudoku.unEnlightenedValue()
+                    sudoku.unSelectSquare()
+                    enableDigitsButton(true)
+                    idGrid = -1
+                    idSquare = -1
+                    tvState.text = resources.getString(R.string.insert_a_value)
+                }
+                R.id.btnPlay -> {
+                    if (statePlayer == STOP) {
+                        setRepeatMode(PLAY, R.drawable.baseline_play_arrow_black_24, false)
+                    } else {
+                        viewModel.startAlgo()
+                    }
+                }
+                R.id.btnRepeat -> {
+                    setRepeatMode(STOP, R.drawable.baseline_stop_black_24, true)
+                    viewModel.startAlgo()
+                }
+                R.id.btnPrevious -> {
+                    tvState.text = resources.getString(R.string.insert_a_value)
+                    viewModel.setPreviousState()
+                }
+                R.id.btnNext -> {
+                    tvState.text = resources.getString(R.string.insert_a_value)
+                    viewModel.setNextState()
+                }
             }
-            R.id.btnPrevious -> {
-                tvState.text = resources.getString(R.string.insert_a_value)
-                viewModel.setPreviousState()
-            }
-            R.id.btnNext -> {
-                tvState.text = resources.getString(R.string.insert_a_value)
-                viewModel.setNextState()
-            }
-        }
-    }
-
-    private val onTouchPadViewListener = object : TouchPadViewListener {
-        override fun onSelectIdGrid(idGrid: Int) {
-            mIdGrid = idGrid
-            viewModel.computeListSquareByIdGrid(idGrid)
-        }
-
-        override fun onSelectIdSquare(idSquare: Int) {
-            mIdSquare = idSquare
-            sudoku.selectSquare(idSquare)
-        }
-
-        override fun onSelectValue(value: Int) {
-            viewModel.insertValueByUser(value.toString(), mIdGrid, mIdSquare)
-        }
-
-        override fun onUnSelectIdGrid(idGrid: Int) {
-            sudoku.unSelectGrid(idGrid)
-            mIdGrid = -1
-        }
-
-        override fun onUnSelectIdSquare(idSquare: Int) {
-            sudoku.unSelectSquare(idSquare)
-            mIdSquare = -1
         }
     }
 
     private val onSudokuListener = object : SudokuView.OnSudokuListener {
         override fun onClickSquare(idGrid: Int, idSquare: Int) {
-
+            this@MainFragment.idGrid = idGrid
+            this@MainFragment.idSquare = idSquare
+            viewModel.getDigitAvailable(idGrid, idSquare)
         }
     }
 
-    private val onCheckedChangeColorListener =
-        RadioGroup.OnCheckedChangeListener { group, checkedId ->
-            viewModel.updateColor(
-                when (checkedId) {
-                    R.id.cb_find -> R.color.colorValueFound
-                    R.id.cb_possibility -> R.color.colorValue
-                    else -> R.color.colorText
-
-                }
-            )
-        }
-
-    private val onCheckedChangeModeListener =
-        RadioGroup.OnCheckedChangeListener { group, checkedId ->
-            viewModel.updateMode(
-                when (checkedId) {
-                    R.id.cb_light_value -> MODE_LIGHT
-                    R.id.cb_modify_possibility -> MODE_UPDATE
-                    else -> MODE_INSERT
-
-                }
-            )
-
-        }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        (activity?.applicationContext as MyApplication).appComponent.inject(this)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        viewModel = ViewModelProviders.of(this).get(SudokuViewModel::class.java)
+        viewModel.state.observe(this, Observer { updateUI(it) })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,118 +114,113 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        vTouchPad.setTouchPadViewListener(onTouchPadViewListener)
-
+        llButton.forEach {
+            it.setOnClickListener(onClickListener)
+        }
         llAction.forEach {
             it.setOnClickListener(onClickListener)
         }
+
         sudoku.setOnSudokuListener(onSudokuListener)
-        constraintLayout.setOnClickListener(onClickListener)
-        rgColorChoice.setOnCheckedChangeListener(onCheckedChangeColorListener)
-        rgModeChoice.setOnCheckedChangeListener(onCheckedChangeModeListener)
 
+        main.setOnClickListener(onClickListener)
+
+        enableDigitsButton(true)
         hideActionButton()
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        viewModel = ViewModelProviders.of(this).get(SudokuViewModel::class.java)
-        viewModel.sudokuData = sudokuData
-        viewModel.state.observe(this, Observer { updateUI(it) })
     }
 
     override fun onStart() {
         super.onStart()
-//        viewModel.insertValueByUser("0", 0, 0)
-//        viewModel.insertValueByUser("4", 0, 1)
-//        viewModel.insertValueByUser("6", 0, 2)
-//        viewModel.insertValueByUser("0", 0, 3)
-//        viewModel.insertValueByUser("8", 0, 4)
-//        viewModel.insertValueByUser("1", 0, 5)
-//        viewModel.insertValueByUser("7", 0, 6)
-//        viewModel.insertValueByUser("5", 0, 7)
-//        viewModel.insertValueByUser("2", 0, 8)
-//
-//        viewModel.insertValueByUser("7", 1, 0)
-//        viewModel.insertValueByUser("2", 1, 1)
-//        viewModel.insertValueByUser("0", 1, 2)
-//        viewModel.insertValueByUser("6", 1, 3)
-//        viewModel.insertValueByUser("4", 1, 4)
-//        viewModel.insertValueByUser("0", 1, 5)
-//        viewModel.insertValueByUser("1", 1, 6)
-//        viewModel.insertValueByUser("8", 1, 7)
-//        viewModel.insertValueByUser("3", 1, 8)
-//
-//        viewModel.insertValueByUser("0", 2, 0)
-//        viewModel.insertValueByUser("0", 2, 1)
-//        viewModel.insertValueByUser("8", 2, 2)
-//        viewModel.insertValueByUser("2", 2, 3)
-//        viewModel.insertValueByUser("0", 2, 4)
-//        viewModel.insertValueByUser("0", 2, 5)
-//        viewModel.insertValueByUser("6", 2, 6)
-//        viewModel.insertValueByUser("9", 2, 7)
-//        viewModel.insertValueByUser("4", 2, 8)
-//
-//        viewModel.insertValueByUser("8", 3, 0)
-//        viewModel.insertValueByUser("9", 3, 1)
-//        viewModel.insertValueByUser("7", 3, 2)
-//        viewModel.insertValueByUser("5", 3, 3)
-//        viewModel.insertValueByUser("0", 3, 4)
-//        viewModel.insertValueByUser("4", 3, 5)
-//        viewModel.insertValueByUser("2", 3, 6)
-//        viewModel.insertValueByUser("0", 3, 7)
-//        viewModel.insertValueByUser("3", 3, 8)
-//
-//        viewModel.insertValueByUser("2", 4, 0)
-//        viewModel.insertValueByUser("5", 4, 1)
-//        viewModel.insertValueByUser("0", 4, 2)
-//        viewModel.insertValueByUser("3", 4, 3)
-//        viewModel.insertValueByUser("9", 4, 4)
-//        viewModel.insertValueByUser("0", 4, 5)
-//        viewModel.insertValueByUser("4", 4, 6)
-//        viewModel.insertValueByUser("0", 4, 7)
-//        viewModel.insertValueByUser("8", 4, 8)
-//
-//        viewModel.insertValueByUser("0", 5, 0)
-//        viewModel.insertValueByUser("4", 5, 1)
-//        viewModel.insertValueByUser("0", 5, 2)
-//        viewModel.insertValueByUser("8", 5, 3)
-//        viewModel.insertValueByUser("2", 5, 4)
-//        viewModel.insertValueByUser("0", 5, 5)
-//        viewModel.insertValueByUser("0", 5, 6)
-//        viewModel.insertValueByUser("0", 5, 7)
-//        viewModel.insertValueByUser("9", 5, 8)
-//
-//        viewModel.insertValueByUser("0", 6, 0)
-//        viewModel.insertValueByUser("7", 6, 1)
-//        viewModel.insertValueByUser("9", 6, 2)
-//        viewModel.insertValueByUser("4", 6, 3)
-//        viewModel.insertValueByUser("3", 6, 4)
-//        viewModel.insertValueByUser("5", 6, 5)
-//        viewModel.insertValueByUser("0", 6, 6)
-//        viewModel.insertValueByUser("2", 6, 7)
-//        viewModel.insertValueByUser("8", 6, 8)
-//
-//        viewModel.insertValueByUser("8", 7, 0)
-//        viewModel.insertValueByUser("0", 7, 1)
-//        viewModel.insertValueByUser("2", 7, 2)
-//        viewModel.insertValueByUser("9", 7, 3)
-//        viewModel.insertValueByUser("0", 7, 4)
-//        viewModel.insertValueByUser("0", 7, 5)
-//        viewModel.insertValueByUser("5", 7, 6)
-//        viewModel.insertValueByUser("3", 7, 7)
-//        viewModel.insertValueByUser("4", 7, 8)
-//
-//        viewModel.insertValueByUser("4", 8, 0)
-//        viewModel.insertValueByUser("3", 8, 1)
-//        viewModel.insertValueByUser("5", 8, 2)
-//        viewModel.insertValueByUser("0", 8, 3)
-//        viewModel.insertValueByUser("8", 8, 4)
-//        viewModel.insertValueByUser("2", 8, 5)
-//        viewModel.insertValueByUser("9", 8, 6)
-//        viewModel.insertValueByUser("0", 8, 7)
-//        viewModel.insertValueByUser("0", 8, 8)
+        viewModel.insertValueByUser("0", 0, 0)
+        viewModel.insertValueByUser("4", 0, 1)
+        viewModel.insertValueByUser("6", 0, 2)
+        viewModel.insertValueByUser("0", 0, 3)
+        viewModel.insertValueByUser("8", 0, 4)
+        viewModel.insertValueByUser("1", 0, 5)
+        viewModel.insertValueByUser("7", 0, 6)
+        viewModel.insertValueByUser("5", 0, 7)
+        viewModel.insertValueByUser("2", 0, 8)
+
+        viewModel.insertValueByUser("7", 1, 0)
+        viewModel.insertValueByUser("2", 1, 1)
+        viewModel.insertValueByUser("0", 1, 2)
+        viewModel.insertValueByUser("6", 1, 3)
+        viewModel.insertValueByUser("4", 1, 4)
+        viewModel.insertValueByUser("0", 1, 5)
+        viewModel.insertValueByUser("1", 1, 6)
+        viewModel.insertValueByUser("8", 1, 7)
+        viewModel.insertValueByUser("3", 1, 8)
+
+        viewModel.insertValueByUser("0", 2, 0)
+        viewModel.insertValueByUser("0", 2, 1)
+        viewModel.insertValueByUser("8", 2, 2)
+        viewModel.insertValueByUser("2", 2, 3)
+        viewModel.insertValueByUser("0", 2, 4)
+        viewModel.insertValueByUser("0", 2, 5)
+        viewModel.insertValueByUser("6", 2, 6)
+        viewModel.insertValueByUser("9", 2, 7)
+        viewModel.insertValueByUser("4", 2, 8)
+
+        viewModel.insertValueByUser("8", 3, 0)
+        viewModel.insertValueByUser("9", 3, 1)
+        viewModel.insertValueByUser("7", 3, 2)
+        viewModel.insertValueByUser("5", 3, 3)
+        viewModel.insertValueByUser("0", 3, 4)
+        viewModel.insertValueByUser("4", 3, 5)
+        viewModel.insertValueByUser("2", 3, 6)
+        viewModel.insertValueByUser("0", 3, 7)
+        viewModel.insertValueByUser("3", 3, 8)
+
+        viewModel.insertValueByUser("2", 4, 0)
+        viewModel.insertValueByUser("5", 4, 1)
+        viewModel.insertValueByUser("0", 4, 2)
+        viewModel.insertValueByUser("3", 4, 3)
+        viewModel.insertValueByUser("9", 4, 4)
+        viewModel.insertValueByUser("0", 4, 5)
+        viewModel.insertValueByUser("4", 4, 6)
+        viewModel.insertValueByUser("0", 4, 7)
+        viewModel.insertValueByUser("8", 4, 8)
+
+        viewModel.insertValueByUser("0", 5, 0)
+        viewModel.insertValueByUser("4", 5, 1)
+        viewModel.insertValueByUser("0", 5, 2)
+        viewModel.insertValueByUser("8", 5, 3)
+        viewModel.insertValueByUser("2", 5, 4)
+        viewModel.insertValueByUser("0", 5, 5)
+        viewModel.insertValueByUser("0", 5, 6)
+        viewModel.insertValueByUser("0", 5, 7)
+        viewModel.insertValueByUser("9", 5, 8)
+
+        viewModel.insertValueByUser("0", 6, 0)
+        viewModel.insertValueByUser("7", 6, 1)
+        viewModel.insertValueByUser("9", 6, 2)
+        viewModel.insertValueByUser("4", 6, 3)
+        viewModel.insertValueByUser("3", 6, 4)
+        viewModel.insertValueByUser("5", 6, 5)
+        viewModel.insertValueByUser("0", 6, 6)
+        viewModel.insertValueByUser("2", 6, 7)
+        viewModel.insertValueByUser("8", 6, 8)
+
+        viewModel.insertValueByUser("8", 7, 0)
+        viewModel.insertValueByUser("0", 7, 1)
+        viewModel.insertValueByUser("2", 7, 2)
+        viewModel.insertValueByUser("9", 7, 3)
+        viewModel.insertValueByUser("0", 7, 4)
+        viewModel.insertValueByUser("0", 7, 5)
+        viewModel.insertValueByUser("5", 7, 6)
+        viewModel.insertValueByUser("3", 7, 7)
+        viewModel.insertValueByUser("4", 7, 8)
+
+        viewModel.insertValueByUser("4", 8, 0)
+        viewModel.insertValueByUser("3", 8, 1)
+        viewModel.insertValueByUser("5", 8, 2)
+        viewModel.insertValueByUser("0", 8, 3)
+        viewModel.insertValueByUser("8", 8, 4)
+        viewModel.insertValueByUser("2", 8, 5)
+        viewModel.insertValueByUser("9", 8, 6)
+        viewModel.insertValueByUser("0", 8, 7)
+        viewModel.insertValueByUser("0", 8, 8)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -283,16 +238,13 @@ class MainFragment : Fragment() {
         when (state) {
             is SudokuState.FillSquare -> {
                 sudoku.updateSudoku(state.sudoku)
-                vTouchPad.refreshValues(state.listSquareData)
                 tvState.text = resources.getString(state.idRes, state.value)
                 displayActionButton(state.isFirstItem, state.isLastItem)
-            }
-            is SudokuState.ModifyPossibility -> {
-                sudoku.updateSudoku(state.sudoku)
             }
             is SudokuState.SuccessAlgo -> {
                 val listValueSelected = state.listValueSelected.toList()
 
+                Log.d("tom971", "${state.listValueSelected.size}")
                 tvState.text = when (state.listValueSelected.size) {
                     2 -> resources.getString(
                         state.idRes,
@@ -323,15 +275,11 @@ class MainFragment : Fragment() {
                 setRepeatMode(PLAY, R.drawable.baseline_play_arrow_black_24, false)
                 tvState.text = resources.getString(state.idResString)
             }
+            is SudokuState.DisplayButton -> updateDigitsButton(state.possibility)
             is SudokuState.RestoreState -> {
                 sudoku.updateSudoku(state.sudoku)
                 displayActionButton(state.isFirstItem, state.isLastItem)
             }
-            is SudokuState.RefreshTouchPad -> {
-                sudoku.selectGrid(mIdGrid)
-                vTouchPad.open(state.listSquareData)
-            }
-
         }
     }
 
@@ -350,6 +298,13 @@ class MainFragment : Fragment() {
         this.isRepeat = isRepeat
     }
 
+    private fun enableDigitsButton(isEnabled: Boolean) {
+        llButton.forEach {
+            val tv = it as TextView
+            tv.isEnabled = isEnabled
+        }
+    }
+
     private fun hideActionButton() {
         btnPrevious.visibility = View.INVISIBLE
         btnNext.visibility = View.INVISIBLE
@@ -366,6 +321,13 @@ class MainFragment : Fragment() {
             View.INVISIBLE
         } else {
             View.VISIBLE
+        }
+    }
+
+    private fun updateDigitsButton(possibility: MutableSet<Int>) {
+        llButton.forEach {
+            val tv = it as TextView
+            tv.isEnabled = possibility.contains(tv.text.toString().toInt())
         }
     }
 

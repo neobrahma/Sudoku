@@ -1,248 +1,149 @@
 package com.lconsulting.sudoku.ui.main
 
-import com.lconsulting.sudoku.data.SudokuData
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import org.junit.Test
 
-object SudokuViewModelTest : Spek({
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Rule
 
-    val viewModel by memoized { SudokuViewModel() }
-    val sudoku by memoized { SudokuData() }
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+class SudokuViewModelTest {
 
-    describe("getIndexSquareInGrid") {
+    @Rule
+    @JvmField
+    val instantTaskExecutor = InstantTaskExecutorRule()
 
-        listOf(
-            1 to 1,
-            12 to 3,
-            40 to 4,
-            44 to 5,
-            60 to 0
-        ).forEach {
-            it("index in grid for this index ${it.first} in sudoku is ${it.second}") {
-                val result = viewModel.getIndexSquareInGrid(it.first)
-                assertEquals(it.second, result)
-            }
-        }
+    lateinit var viewModel: SudokuViewModel
+
+    @Before
+    fun setUp() {
+        viewModel = SudokuViewModel()
     }
 
-    describe("getIndexGrid") {
-        var index = 70
-        var resultExpected = 8
-        it("with index $index and should return indexGrid to $resultExpected") {
-            val result = viewModel.getIndexGrid(index)
-            assertEquals(resultExpected, result)
-        }
+    @Test
+    fun test_getStartIndexColumnBy9() {
+        val method = viewModel.javaClass.getDeclaredMethod("getStartIndexColumnBy9", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 5
+        assertEquals(5, method.invoke(viewModel, *parameters))
     }
 
-    describe("getIndex") {
-        var idGrid = 4
-        var idSquare = 8
-        var resultExpected = 50
-        it("with idGrid $idGrid & idSquare $idSquare, should return index $resultExpected\"") {
-            val result = viewModel.getIndex(idGrid, idSquare)
-            assertEquals(resultExpected, result)
-        }
+    @Test
+    fun test_getStartIndexGridBy9() {
+        val method = viewModel.javaClass.getDeclaredMethod("getStartIndexGridBy9", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 5
+        assertEquals(33, method.invoke(viewModel, *parameters))
     }
 
-    describe("getStartIndexGrid") {
-        var index = 70
-        var resultExpected = 60
-        it("with index $index, should return startIndexGrid $resultExpected\"") {
-            val result = viewModel.getStartIndexGrid(index)
-            assertEquals(resultExpected, result)
-        }
+    @Test
+    fun test_getStartIndexRowBy9() {
+        val method = viewModel.javaClass.getDeclaredMethod("getStartIndexRowBy9", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 5
+        assertEquals(45, method.invoke(viewModel, *parameters))
     }
 
-    describe("getStartIndexColumn") {
-        var index = 70
-        var resultExpected = 7
-        it("with index $index, should return startIndexColumn $resultExpected\"") {
-            val result = viewModel.getStartIndexColumn(index)
-            assertEquals(resultExpected, result)
-        }
+    @Test
+    fun test_getIndexForRow() {
+        val method = viewModel.javaClass.getDeclaredMethod("getIndexForRow", Int::class.java, Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(2)
+        parameters[0] = 36
+        parameters[1] = 5
+        assertEquals(41, method.invoke(viewModel, *parameters))
     }
 
-    describe("getStartIndexRow") {
-        var index = 70
-        var resultExpected = 63
-        it("with index $index, should return startIndexRow $resultExpected\"") {
-            val result = viewModel.getStartIndexRow(index)
-            assertEquals(resultExpected, result)
-        }
+    @Test
+    fun test_getIndexForColumn() {
+        val method = viewModel.javaClass.getDeclaredMethod("getIndexForColumn", Int::class.java, Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(2)
+        parameters[0] = 5
+        parameters[1] = 5
+        assertEquals(50, method.invoke(viewModel, *parameters))
     }
 
-    describe("getIndexInGrid") {
-        listOf(
-            (0 to 0) to 0,
-            (30 to 3) to 39,
-            (60 to 5) to 71
-        ).forEach {
-            it("with start Index ${it.first.first} & position ${it.first.second} to, should return index : ${it.second}") {
-                val result = viewModel.getIndexInGrid(it.first.first, it.first.second)
-                assertEquals(it.second, result)
-            }
-        }
+    @Test
+    fun test_getIndexForGrid() {
+        val method = viewModel.javaClass.getDeclaredMethod("getIndexForGrid", Int::class.java, Int::class.java)
+        method.isAccessible = true
+
+        val parameters = arrayOfNulls<Any>(2)
+        parameters[0] = 30
+        parameters[1] = 0
+        assertEquals(30, method.invoke(viewModel, *parameters))
+
+        parameters[0] = 30
+        parameters[1] = 2
+        assertEquals(32, method.invoke(viewModel, *parameters))
+
+        parameters[0] = 30
+        parameters[1] = 5
+        assertEquals(41, method.invoke(viewModel, *parameters))
     }
 
-    describe("getIndexInRow") {
-        listOf(
-            (0 to 0) to 0,
-            (36 to 3) to 39,
-            (63 to 5) to 68
-        ).forEach {
-            it("with start Index to  ${it.first.first} & position ${it.first.second}, index is ${it.second}") {
-                val result = viewModel.getIndexInRow(it.first.first, it.first.second)
-                assertEquals(it.second, result)
-            }
-        }
+    @Test
+    fun test_getStartIndexRow() {
+        val method = viewModel.javaClass.getDeclaredMethod("getStartIndexRow", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 70
+        assertEquals(63, method.invoke(viewModel, *parameters))
     }
 
-    describe("getIndexInColumn") {
-        listOf(
-            (0 to 0) to 0,
-            (4 to 3) to 31,
-            (8 to 5) to 53
-        ).forEach {
-            it("with start Index to  ${it.first.first} & position ${it.first.second} to, index is ${it.second}") {
-                val result = viewModel.getIndexInColumn(it.first.first, it.first.second)
-                assertEquals(it.second, result)
-            }
-        }
+    @Test
+    fun test_getStartIndexColumn() {
+        val method = viewModel.javaClass.getDeclaredMethod("getStartIndexColumn", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 70
+        assertEquals(7, method.invoke(viewModel, *parameters))
     }
 
-    describe("getStartIndexRowByPosition") {
-        listOf(
-            0 to 0,
-            4 to 36,
-            6 to 54
-        ).forEach {
-            it("with position to  ${it.first}, start index row is ${it.second}") {
-                val result = viewModel.getStartIndexRowByPosition(it.first)
-                assertEquals(it.second, result)
-            }
-        }
+    @Test
+    fun test_getStartIndexGrid() {
+        val method = viewModel.javaClass.getDeclaredMethod("getStartIndexGrid", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 70
+        assertEquals(60, method.invoke(viewModel, *parameters))
+    }
+    
+    @Test
+    fun test_getIndex() {
+        val method = viewModel.javaClass.getDeclaredMethod("getIndex", Int::class.java, Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(2)
+        parameters[0] = 1
+        parameters[1] = 4
+        assertEquals(13, method.invoke(viewModel, *parameters))
     }
 
-    describe("getStartIndexGridByPosition") {
-        listOf(
-            0 to 0,
-            4 to 30,
-            6 to 54
-        ).forEach {
-            it("with position to  ${it.first}, start index grid  is ${it.second}") {
-                val result = viewModel.getStartIndexGridByPosition(it.first)
-                assertEquals(it.second, result)
-            }
-        }
+    @Test
+    fun test_getIndexGrid() {
+        val method = viewModel.javaClass.getDeclaredMethod("getIndexGrid", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 70
+        assertEquals(8, method.invoke(viewModel, *parameters))
     }
 
-    describe("getStartIndexColumnByPosition") {
-        listOf(
-            0 to 0,
-            4 to 4,
-            6 to 6
-        ).forEach {
-            it("with position to  ${it.first}, start index column is ${it.second}") {
-                val result = viewModel.getStartIndexColumnByPosition(it.first)
-                assertEquals(it.second, result)
-            }
-        }
+    @Test
+    fun test_getIndexSquareInGrid() {
+        val method = viewModel.javaClass.getDeclaredMethod("getIndexSquareInGrid", Int::class.java)
+        method.isAccessible = true
+        val parameters = arrayOfNulls<Any>(1)
+        parameters[0] = 61
+        assertEquals(1, method.invoke(viewModel, *parameters))
     }
 
-    describe("removeValuePair with modification") {
-        listOf(
-            0 to 1
-        ).forEach { pair ->
-            beforeEachTest {
-                sudoku[pair.second].possibility.removeIf { it != 1 && it != 2 }
-                viewModel.sudokuData = sudoku
-            }
-            it("remove value from indexPair ${pair.second} on index ${pair.first} and should return true") {
-                val result = viewModel.removeValuePair(pair.first, pair.second)
-                assertEquals(true, result)
-                assertEquals(7, viewModel.sudokuData[pair.first].possibility.size)
-                assertEquals(2, viewModel.sudokuData[pair.second].possibility.size)
-            }
-        }
-    }
-
-    describe("removeValuePair with no modification") {
-        listOf(
-            0 to 1
-        ).forEach { pair ->
-            beforeEachTest {
-                sudoku[pair.first].possibility.removeIf { it == 1 || it == 2 }
-                sudoku[pair.second].possibility.removeIf { it != 1 && it != 2 }
-                viewModel.sudokuData = sudoku
-            }
-            it("remove value from indexPair ${pair.second} on index ${pair.first} and should return false") {
-                val result = viewModel.removeValuePair(pair.first, pair.second)
-                assertEquals(false, result)
-                assertEquals(7, viewModel.sudokuData[pair.first].possibility.size)
-                assertEquals(2, viewModel.sudokuData[pair.second].possibility.size)
-            }
-        }
-    }
-
-    describe("containsOnlyPair with 2 identical sets") {
-        listOf(
-            0 to 1
-        ).forEach { pair ->
-            beforeEachTest {
-                sudoku[pair.first].possibility.removeIf { it != 1 && it != 2 }
-                sudoku[pair.second].possibility.removeIf { it != 1 && it != 2 }
-                viewModel.sudokuData = sudoku
-            }
-            it("from indexPair ${pair.second} on index ${pair.first} and should return true") {
-                val result = viewModel.containsOnlyPair(
-                    viewModel.sudokuData[pair.first].possibility,
-                    viewModel.sudokuData[pair.second].possibility
-                )
-                assertEquals(true, result)
-            }
-        }
-    }
-
-    describe("containsOnlyPair with 2 different sets") {
-        listOf(
-            0 to 1
-        ).forEach { pair ->
-            beforeEachTest {
-                sudoku[pair.first].possibility.removeIf { it != 1 && it != 2 }
-                sudoku[pair.second].possibility.removeIf { it != 2 && it != 4 }
-                viewModel.sudokuData = sudoku
-            }
-            it("from indexPair ${pair.second} on index ${pair.first} and should return false") {
-                val result = viewModel.containsOnlyPair(
-                    viewModel.sudokuData[pair.first].possibility,
-                    viewModel.sudokuData[pair.second].possibility
-                )
-
-                assertEquals(false, result)
-            }
-        }
-    }
-
-    describe("containsOnlyPair with a set who contains more 2 values") {
-        listOf(
-            0 to 1
-        ).forEach { pair ->
-            beforeEachTest {
-                sudoku[pair.second].possibility.removeIf { it != 2 && it != 4 }
-                println("${sudoku[pair.second].possibility}")
-                viewModel.sudokuData = sudoku
-            }
-            it("from indexPair ${pair.second} on index ${pair.first} and should return false") {
-                val result = viewModel.containsOnlyPair(
-                    viewModel.sudokuData[pair.first].possibility,
-                    viewModel.sudokuData[pair.second].possibility
-                )
-                assertNotEquals(2, sudoku[pair.first].possibility.size)
-                assertEquals(2, sudoku[pair.second].possibility.size)
-                assertEquals(false, result)
-            }
-        }
-    }
-})
+}

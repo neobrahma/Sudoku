@@ -12,7 +12,7 @@ import com.lconsulting.sudoku.R
 import com.lconsulting.sudoku.data.SquareData
 import kotlinx.android.synthetic.main.view_square.view.*
 
-class SqareView : ConstraintLayout, ISquareView{
+class SqareView : ConstraintLayout {
 
     private var squareData : SquareData = SquareData()
 
@@ -33,7 +33,7 @@ class SqareView : ConstraintLayout, ISquareView{
         }
     }
 
-    override fun updateSquare(square: SquareData) {
+    fun updateSquare(square: SquareData) {
         squareData = square
         if (square.value != 0) {
             tvValue.apply {
@@ -58,14 +58,14 @@ class SqareView : ConstraintLayout, ISquareView{
         }
     }
 
-    override fun unSelectSquare() {
+    fun unSelectSquare() {
         listSquareView.forEach {
             setTextViewUI(it, R.color.colorText, Typeface.NORMAL)
         }
         background = resources.getDrawable(R.drawable.background_square)
     }
 
-    override fun selectSquare() {
+    fun selectSquare() {
         background = resources.getDrawable(R.drawable.background_square_selected)
     }
 
@@ -76,14 +76,14 @@ class SqareView : ConstraintLayout, ISquareView{
         }
     }
 
-    override fun selectSquare(listValueSelected: List<Int>, idResColor : Int) {
+    fun selectSquare(listValueSelected: List<Int>, idResColor : Int) {
         listValueSelected.forEach {
             setTextViewUI(listSquareView[it-1], idResColor, Typeface.BOLD)
         }
         selectSquare()
     }
 
-    override fun enlightenedValue(value: Int) {
+    fun enlightenedValue(value: Int) {
         if(squareData.value == value){
             setTextViewUI(tvValue, R.color.colorValueFound, Typeface.BOLD)
         }else if(squareData.possibility.contains(value)){
@@ -91,7 +91,7 @@ class SqareView : ConstraintLayout, ISquareView{
         }
     }
 
-    override fun unEnlightenedValue() {
+    fun unEnlightenedValue() {
         if(squareData.value != 0){
             setTextViewUI(tvValue, squareData.idTextColor, Typeface.NORMAL)
         }else{

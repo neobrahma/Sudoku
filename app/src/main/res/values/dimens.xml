@@ -3,9 +3,4 @@
     <dimen name="size">10dp</dimen>
     <dimen name="size_button">50dp</dimen>
     <dimen name="police">9sp</dimen>
-    <dimen name="numberBigSize">26sp</dimen>
-    <dimen name="numberSmallSize">8sp</dimen>
-
-    <dimen name="touchpad_square_size">40sp</dimen>
-    <dimen name="touchpad_size">120sp</dimen>
 </resources>

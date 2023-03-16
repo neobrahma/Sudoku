@@ -3,7 +3,6 @@ package com.lconsulting.sudoku
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.lconsulting.sudoku.ui.main.MainFragment
-import kotlinx.android.synthetic.main.main_activity_1.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,6 +14,5 @@ class MainActivity : AppCompatActivity() {
                     .replace(R.id.container, MainFragment.newInstance())
                     .commitNow()
         }
-
     }
 }

@@ -4,21 +4,26 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnClickListener
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.GridLayout
 import androidx.core.view.forEach
 import com.lconsulting.sudoku.R
+import com.lconsulting.sudoku.data.SquareData
 
-class GridView : ConstraintLayout {
+class GridView : GridLayout {
 
-    private val mListSquareView: MutableList<SquareView> = mutableListOf()
+    private var onGridListener: OnGridListener? = null
+    private val listSquareView: MutableList<SqareView> = mutableListOf()
+    private val listSquareViewSelected: MutableList<SqareView> = mutableListOf()
 
-    private var mListener: GridViewListener? = null
-
-    private var mPossibility: MutableSet<Int>? = null
-
-    private val onClickListener = OnClickListener {
-        val valueSelected = it.tag.toString().toInt()
-        mListener?.onClickValue(valueSelected)
+    private val onClickListener = OnClickListener { v ->
+        when (v) {
+            is SqareView -> {
+                unSelectedSquare()
+                listSquareViewSelected.add(v)
+                v.selectSquare()
+                onGridListener?.onClickSquare((v.tag as String).toInt())
+            }
+        }
     }
 
     constructor(context: Context) : this(context, null)
@@ -31,33 +36,51 @@ class GridView : ConstraintLayout {
         defStyleAttr
     ) {
         LayoutInflater.from(context).inflate(R.layout.view_grid, this, true)
+        columnCount = 3
+
         forEach {
-            when (it) {
-                is SquareView -> {
-                    mListSquareView.add(it)
-                    it.setOnClickListener(onClickListener)
-                }
-            }
+            listSquareView.add(it as SqareView)
+            it.setOnClickListener(onClickListener)
         }
     }
 
-    fun refreshValues(possibility: MutableSet<Int>) {
-        mPossibility = possibility
-        mListSquareView.forEach { squareView ->
-            val valueString = squareView.tag.toString()
-            val valueInt = valueString.toInt()
-            squareView.displayValue(
-                valueString,
-                possibility.contains(valueInt)
-            )
+    fun setOnGridListener(listener: OnGridListener) {
+        onGridListener = listener
+    }
+
+    fun updateGrid(square: Int, solution: SquareData) {
+        listSquareView[square].updateSquare(solution)
+        unSelectedSquare()
+    }
+
+    fun unSelectedSquare() {
+        listSquareViewSelected.forEach {
+            it.unSelectSquare()
+        }
+        listSquareViewSelected.clear()
+    }
+
+    fun selectSquare(idSquare: Int, listValueSelected: List<Int>, idResColor : Int) {
+        val square = listSquareView[idSquare]
+        listSquareViewSelected.add(square)
+        square.selectSquare(listValueSelected, idResColor)
+
+    }
+
+    fun enlightenedValue(value: Int) {
+        listSquareView.forEach {
+            it.enlightenedValue(value)
         }
     }
 
-    fun setGridViewListener(listener: GridViewListener) {
-        mListener = listener
+    fun unEnlightenedValue() {
+        listSquareView.forEach {
+            it.unEnlightenedValue()
+        }
     }
 
-    interface GridViewListener {
-        fun onClickValue(value: Int)
+    interface OnGridListener {
+        fun onClickSquare(position: Int)
     }
+
 }

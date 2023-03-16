@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="0"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="1"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="2"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="3"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="4"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="5"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="6"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/background_grid"
             android:tag="7"/>
 
-        <com.lconsulting.sudoku.ui.view.GridViewBis
+        <com.lconsulting.sudoku.ui.view.GridView
             android:id="@+id/gv9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

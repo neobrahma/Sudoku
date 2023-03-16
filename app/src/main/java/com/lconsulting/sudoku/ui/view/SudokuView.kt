@@ -11,14 +11,8 @@ import com.lconsulting.sudoku.data.SquareData
 class SudokuView : GridLayout {
 
     private var onSudokuListener: OnSudokuListener? = null
-    private val listGridViewSelected = mutableListOf<GridViewBis>()
-    private val listGridView: MutableList<GridViewBis> = mutableListOf()
-
-    private val onGridListener = object : GridViewBis.OnGridListener {
-        override fun onClickSquare(view: GridViewBis, position: Int) {
-            onSudokuListener?.onClickSquare(view.tag.toString().toInt(), position)
-        }
-    }
+    private val listGridViewSelected = mutableListOf<GridView>()
+    private val listGridView: MutableList<GridView> = mutableListOf()
 
     constructor(context: Context) : this(context, null)
 
@@ -33,9 +27,20 @@ class SudokuView : GridLayout {
         columnCount = 3
 
         forEach {
-            val grid = it as GridViewBis
+            val grid = it as GridView
             listGridView.add(grid)
-            grid.setOnGridListener(onGridListener)
+            grid.setOnGridListener(object : GridView.OnGridListener {
+                override fun onClickSquare(position: Int) {
+                    if (!listGridViewSelected.contains(grid)) {
+                        listGridViewSelected.forEach { gridViewSelected ->
+                            gridViewSelected.unSelectedSquare()
+                        }
+                        listGridViewSelected.clear()
+                    }
+                    listGridViewSelected.add(grid)
+                    onSudokuListener?.onClickSquare(grid.tag.toString().toInt(), position)
+                }
+            })
         }
     }
 
@@ -52,13 +57,11 @@ class SudokuView : GridLayout {
 
             listGridView[grid].updateGrid(square, solution[i])
         }
+
+        unSelectSquare()
     }
 
-    fun selectSquare(
-        listSquareSelected: List<Pair<Int, Int>>,
-        listValueSelected: List<Int>,
-        idResColor: Int
-    ) {
+    fun selectSquare(listSquareSelected: List<Pair<Int, Int>>, listValueSelected: List<Int>, idResColor : Int) {
         listSquareSelected.forEach {
             val grid = listGridView[it.first]
             listGridViewSelected.add(grid)
@@ -66,6 +69,13 @@ class SudokuView : GridLayout {
         }
     }
 
+    fun unSelectSquare(){
+        listGridViewSelected.forEach {
+            it.unSelectedSquare()
+        }
+
+        listGridViewSelected.clear()
+    }
 
     fun enlightenedValue(value: Int) {
         listGridView.forEach {
@@ -76,34 +86,6 @@ class SudokuView : GridLayout {
     fun unEnlightenedValue() {
         listGridView.forEach {
             it.unEnlightenedValue()
-        }
-    }
-
-    fun selectGrid(idGrid: Int) {
-        listGridViewSelected.add(listGridView[idGrid])
-        listGridView[idGrid].selectGrid()
-    }
-
-    fun unSelectGrid(idGrid: Int) {
-        listGridView[idGrid].unSelectGrid()
-        listGridViewSelected.clear()
-    }
-
-    fun selectSquare(idSquare: Int) {
-        listGridViewSelected.forEach {
-            it.selectSquare(idSquare)
-        }
-    }
-
-    fun unSelectSquare(idSquare: Int) {
-        listGridViewSelected.forEach {
-            it.unSelectSquare(idSquare)
-        }
-    }
-
-    fun unSelectSquare() {
-        listGridViewSelected.forEach {
-            it.unSelectedSquare()
         }
     }
 

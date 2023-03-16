@@ -1,12 +1,9 @@
 package com.lconsulting.sudoku.ui.main
 
-import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.lconsulting.sudoku.R
 import com.lconsulting.sudoku.data.SquareData
-import com.lconsulting.sudoku.data.SudokuData
 import com.lconsulting.sudoku.memento.Caretaker
 import com.lconsulting.sudoku.memento.Originator
 
@@ -14,12 +11,7 @@ import com.lconsulting.sudoku.memento.Originator
 sealed class SudokuState {
     class FillSquare(
         val sudoku: Array<SquareData>, val idRes: Int, val value: Int,
-        val isFirstItem: Boolean, val isLastItem: Boolean,
-        val listSquareData: MutableList<SquareData>
-    ) : SudokuState()
-
-    class ModifyPossibility(
-        val sudoku: Array<SquareData>
+        val isFirstItem: Boolean, val isLastItem: Boolean
     ) : SudokuState()
 
     class SuccessAlgo(
@@ -33,10 +25,6 @@ sealed class SudokuState {
     class RestoreState(
         val sudoku: Array<SquareData>,
         val isFirstItem: Boolean, val isLastItem: Boolean
-    ) : SudokuState()
-
-    class RefreshTouchPad(
-        val listSquareData: MutableList<SquareData>
     ) : SudokuState()
 
     class DisplayButton(val possibility: MutableSet<Int>) : SudokuState()
@@ -64,25 +52,24 @@ sealed class SudokuState {
  *
  */
 
-
-class SudokuViewModel : ViewModel() {
+open class SudokuViewModel : ViewModel() {
 
     private val caretaker: Caretaker = Caretaker()
     private val originator: Originator = Originator()
 
     val state = MutableLiveData<SudokuState>()
 
-    lateinit var sudokuData: SudokuData
+    private var digitsToFind = 81
 
-    private var mIdColorRes = R.color.colorText
-    private var mIdMode = MODE_INSERT
+    private var sudoku: Array<SquareData> = Array(81) { SquareData() }
 
     /**
      * reset sudoku to default values
      */
     fun reset() {
-        sudokuData.reset()
-        state.postValue(SudokuState.Reset(sudokuData.sudoku))
+        digitsToFind = 81
+        sudoku = Array(81) { SquareData() }
+        state.postValue(SudokuState.Reset(sudoku))
         caretaker.clearMemento()
         originator.clearState()
     }
@@ -96,7 +83,7 @@ class SudokuViewModel : ViewModel() {
     fun getDigitAvailable(idGrid: Int, idSquare: Int) {
         val pos = getIndex(idGrid, idSquare)
 
-        val squareData = sudokuData[pos]
+        val squareData = sudoku[pos]
         state.postValue(SudokuState.DisplayButton(squareData.possibility))
     }
 
@@ -110,41 +97,29 @@ class SudokuViewModel : ViewModel() {
      */
     fun insertValueByUser(sValue: String, idGrid: Int, idSquare: Int) {
         if (sValue != "0") {
-
-            val newValue = sValue.toInt()
             val index = getIndex(idGrid, idSquare)
 
-            Log.d("tom971", "insertValueByUser $mIdMode")
+            val newValue = sValue.toInt()
+            val oldValue = sudoku[index].value
 
-            if (mIdMode == MODE_INSERT) {
-                val oldValue = sudokuData[index].value
-
-                if (oldValue != 0) {
-                    removeValue(oldValue, index)
-                }
-
-                if (newValue != oldValue) {
-                    addValue(newValue, mIdColorRes, index)
-                }
-
-                saveState(newValue, idGrid, idSquare, mIdColorRes)
-
-                state.postValue(
-                    SudokuState.FillSquare(
-                        sudokuData.sudoku,
-                        R.string.insert_value,
-                        newValue,
-                        caretaker.isFirstItem(),
-                        caretaker.isLastItem(),
-                        getListSquareByIdGrid(idGrid)
-                    )
-                )
-            } else if (mIdMode == MODE_UPDATE) {
-                sudokuData.updatePossibilty(index, newValue)
-                state.postValue(SudokuState.ModifyPossibility(sudokuData.sudoku))
+            if (oldValue != 0) {
+                removeValue(oldValue, index)
             }
-        }
 
+            addValue(newValue, R.color.colorValue, index)
+
+            saveState(newValue, idGrid, idSquare, R.color.colorValue)
+
+            state.postValue(
+                SudokuState.FillSquare(
+                    sudoku,
+                    R.string.insert_value,
+                    newValue,
+                    caretaker.isFirstItem(),
+                    caretaker.isLastItem()
+                )
+            )
+        }
     }
 
     /**
@@ -152,7 +127,7 @@ class SudokuViewModel : ViewModel() {
      * else we search value
      */
     fun startAlgo() {
-        if (sudokuData.digitsToFind == 0) {
+        if (digitsToFind == 0) {
             state.postValue(SudokuState.DisplayMessage(R.string.success_sudoku))
         } else if (!searchValue()) {
             state.postValue(SudokuState.DisplayMessage(R.string.error_sudoku))
@@ -179,7 +154,7 @@ class SudokuViewModel : ViewModel() {
         removeValue(memento.value, getIndex(memento.idGrid, memento.idSquare))
         state.postValue(
             SudokuState.RestoreState(
-                sudokuData.sudoku, caretaker.isFirstItem(),
+                sudoku, caretaker.isFirstItem(),
                 caretaker.isLastItem()
             )
         )
@@ -193,7 +168,7 @@ class SudokuViewModel : ViewModel() {
         addValue(memento.value, memento.idResColor, getIndex(memento.idGrid, memento.idSquare))
         state.postValue(
             SudokuState.RestoreState(
-                sudokuData.sudoku, caretaker.isFirstItem(),
+                sudoku, caretaker.isFirstItem(),
                 caretaker.isLastItem()
             )
         )
@@ -258,8 +233,8 @@ class SudokuViewModel : ViewModel() {
             val startIndex = getStartIndexGridByPosition(idGrid)
             for (indexSquare in 0 until 9) {
                 val index = getIndexInGrid(startIndex, indexSquare)
-                if (sudokuData[index].value == 0) {
-                    sudokuData[index].possibility.forEach {
+                if (sudoku[index].value == 0) {
+                    sudoku[index].possibility.forEach {
                         tabCompteur[it - 1].add(index)
                     }
                 }
@@ -343,7 +318,7 @@ class SudokuViewModel : ViewModel() {
 
                         state.postValue(
                             SudokuState.SuccessAlgo(
-                                sudokuData.sudoku,
+                                sudoku,
                                 idRes,
                                 mutableSetOf(i + 1),
                                 convertSetIndexToLIstPair(setIndexSelectedToKeep),
@@ -376,8 +351,8 @@ class SudokuViewModel : ViewModel() {
         var result = false
         for (position in 0 until 9) {
             val index = getIndexFor(startIndex, position)
-            if (sudokuData[index].value == 0 && !setIndex.contains(index)) {
-                val resultRemove = remove(sudokuData[index], value)
+            if (sudoku[index].value == 0 && !setIndex.contains(index)) {
+                val resultRemove = remove(sudoku[index], value)
                 if (resultRemove) {
                     result = true
                 }
@@ -395,7 +370,11 @@ class SudokuViewModel : ViewModel() {
      * @param index square index where we add the value
      */
     private fun addValue(value: Int, idTextColor: Int, index: Int) {
-        sudokuData.addValue(index, value, idTextColor)
+        sudoku[index].apply {
+            this.value = value
+            this.idTextColor = idTextColor
+        }
+        digitsToFind--
         updateDigitsAvailable(value, getStartIndexGrid(index), ::getIndexInGrid, ::remove)
         updateDigitsAvailable(value, getStartIndexRow(index), ::getIndexInRow, ::remove)
         updateDigitsAvailable(value, getStartIndexColumn(index), ::getIndexInColumn, ::remove)
@@ -409,14 +388,15 @@ class SudokuViewModel : ViewModel() {
      * @param index square index where we remove the value
      */
     private fun removeValue(value: Int, index: Int) {
-        sudokuData.removeValue(index, value)
+        sudoku[index].value = 0
+        digitsToFind++
         updateDigitsAvailable(value, getStartIndexColumn(index), ::getIndexInColumn, ::add)
         updateDigitsAvailable(value, getStartIndexRow(index), ::getIndexInRow, ::add)
         updateDigitsAvailable(value, getStartIndexGrid(index), ::getIndexInGrid, ::add)
 
-        for (i in sudokuData.sudoku.indices) {
-            val v = sudokuData[i].value
-            if (v != 0) {
+        for (i in sudoku.indices){
+            val v = sudoku[i].value
+            if(v != 0 ){
                 updateDigitsAvailable(v, getStartIndexGrid(i), ::getIndexInGrid, ::remove)
                 updateDigitsAvailable(v, getStartIndexRow(i), ::getIndexInRow, ::remove)
                 updateDigitsAvailable(v, getStartIndexColumn(i), ::getIndexInColumn, ::remove)
@@ -440,8 +420,8 @@ class SudokuViewModel : ViewModel() {
     ) {
         for (i in 0 until 9) {
             val index = getIndex(startIndex, i)
-            if (sudokuData[index].value != value) {
-                action(sudokuData[index], value)
+            if (sudoku[index].value != value) {
+                action(sudoku[index], value)
             }
         }
     }
@@ -474,9 +454,9 @@ class SudokuViewModel : ViewModel() {
      */
     private fun checkOneValueBySquare(): Boolean {
         var result = false
-        for (index in sudokuData.sudoku.indices) {
-            if (sudokuData[index].value == 0 && sudokuData[index].possibility.size == 1) {
-                val value = sudokuData[index].possibility.toList()[0]
+        for (index in sudoku.indices) {
+            if (sudoku[index].value == 0 && sudoku[index].possibility.size == 1) {
+                val value = sudoku[index].possibility.toList()[0]
                 addValue(value, R.color.colorValueFound, index)
                 saveState(
                     value,
@@ -494,7 +474,7 @@ class SudokuViewModel : ViewModel() {
 
                 state.postValue(
                     SudokuState.SuccessAlgo(
-                        sudokuData.sudoku,
+                        sudoku,
                         R.string.one_value_by_square,
                         mutableSetOf(value),
                         convertSetIndexToLIstPair(mutableSetOf(index)),
@@ -547,7 +527,7 @@ class SudokuViewModel : ViewModel() {
      * if square is found, update view
      *
      * @param idRes id String to explain result
-     * @param getIndexIn getIndexInGrid | getIndexInRow | getIndexInColunm
+     *
      * @return true if square is found else false
      */
     private fun checkOneValue9Time(
@@ -580,8 +560,8 @@ class SudokuViewModel : ViewModel() {
         for (position in 0 until 9) {
             val index = getIndex(startIndex, position)
 
-            if (sudokuData[index].value == 0) {
-                sudokuData[index].possibility.forEach {
+            if (sudoku[index].value == 0) {
+                sudoku[index].possibility.forEach {
                     tabCompteur[it - 1].add(index)
                 }
             }
@@ -607,7 +587,7 @@ class SudokuViewModel : ViewModel() {
 
                 state.postValue(
                     SudokuState.SuccessAlgo(
-                        sudokuData.sudoku, idRes, mutableSetOf(value),
+                        sudoku, idRes, mutableSetOf(value),
                         convertSetIndexToLIstPair(mutableSetOf(index)),
                         convertSetIndexToLIstPair(setIndexSelectedToRemove)
                     )
@@ -643,7 +623,7 @@ class SudokuViewModel : ViewModel() {
     private fun findIndexByRow(startIndex: Int, value: Int): Int {
         for (i in 0 until 9) {
             var index = startIndex + i
-            val squareData = sudokuData[index]
+            val squareData = sudoku[index]
             if (squareData.value == 0 && squareData.possibility.contains(value)) {
                 return index
             }
@@ -660,7 +640,7 @@ class SudokuViewModel : ViewModel() {
     private fun findIndexByColumn(startIndex: Int, value: Int): Int {
         for (i in 0 until 9) {
             var index = startIndex + i * 9
-            val squareData = sudokuData[index]
+            val squareData = sudoku[index]
             if (squareData.value == 0 && squareData.possibility.contains(value)) {
                 return index
             }
@@ -677,7 +657,7 @@ class SudokuViewModel : ViewModel() {
     private fun findIndexByGrid(startIndex: Int, value: Int): Int {
         for (i in 0 until 9) {
             var index = startIndex + (i % 3) + ((i / 3) * 9)
-            val squareData = sudokuData[index]
+            val squareData = sudoku[index]
             if (squareData.value == 0 && squareData.possibility.contains(value)) {
                 return index
             }
@@ -694,8 +674,8 @@ class SudokuViewModel : ViewModel() {
      * @return true if pair is found
      */
     private fun checkPair(): Boolean {
-        for (index in sudokuData.sudoku.indices) {
-            val square = sudokuData[index]
+        for (index in sudoku.indices) {
+            val square = sudoku[index]
             if (square.value == 0 && square.possibility.size == 2) {
                 if (checkPairByGrid(index)) {
                     return true
@@ -744,7 +724,7 @@ class SudokuViewModel : ViewModel() {
         )
 
         if (setIndex.size == 1) {
-            var idResString: Int = R.string.pair_found_grid
+            var idResString : Int = R.string.pair_found_grid
             val indexOtherPair = setIndex.toList()[0]
 
             val setIndexSelected = mutableSetOf<Int>()
@@ -826,7 +806,7 @@ class SudokuViewModel : ViewModel() {
         getIndexFor: (start: Int, position: Int) -> Int,
         isColunm: Boolean,
         isRow: Boolean,
-        idResString: Int
+        idResString : Int
     ): Boolean {
         var setIndex = mutableSetOf<Int>()
 
@@ -890,9 +870,9 @@ class SudokuViewModel : ViewModel() {
     ) {
         state.postValue(
             SudokuState.SuccessAlgo(
-                sudokuData.sudoku,
+                sudoku,
                 idRes,
-                sudokuData[indexPair].possibility,
+                sudoku[indexPair].possibility,
                 listIndexToKeep,
                 listIndexToRemove
             )
@@ -917,7 +897,7 @@ class SudokuViewModel : ViewModel() {
             val index = getIndexFor(startIndex, i)
 
             var result = false
-            if (sudokuData[index].value == 0 && index != indexPair && index != indexOtherPair) {
+            if (sudoku[index].value == 0 && index != indexPair && index != indexOtherPair) {
                 result = removeValuePair(index, indexPair)
             }
             if (result) {
@@ -947,7 +927,7 @@ class SudokuViewModel : ViewModel() {
         for (i in 0 until 9) {
             val index = getIndexFor(startIndex, i)
             if (indexPair != index) {
-                if (contains(sudokuData[index].possibility, sudokuData[indexPair].possibility)) {
+                if (contains(sudoku[index].possibility, sudoku[indexPair].possibility)) {
                     setIndex.add(index)
                 }
             }
@@ -961,8 +941,7 @@ class SudokuViewModel : ViewModel() {
      * @param setPossibility
      * @param setPossibilityPair
      */
-    @VisibleForTesting
-    fun containsOnlyPair(setPossibility: Set<Int>, setPossibilityPair: Set<Int>) =
+    private fun containsOnlyPair(setPossibility: Set<Int>, setPossibilityPair: Set<Int>) =
         setPossibility.size == 2 && setPossibility.containsAll(setPossibilityPair)
 
     /**
@@ -973,9 +952,8 @@ class SudokuViewModel : ViewModel() {
      * @param indexPair
      * @return true if there are some values to remove
      */
-    @VisibleForTesting
-    fun removeValuePair(index: Int, indexPair: Int): Boolean {
-        return sudokuData[index].possibility.removeAll(sudokuData[indexPair].possibility)
+    private fun removeValuePair(index: Int, indexPair: Int): Boolean {
+        return sudoku[index].possibility.removeAll(sudoku[indexPair].possibility)
     }
 
     /**
@@ -984,8 +962,7 @@ class SudokuViewModel : ViewModel() {
      * @param position in [0,8]
      * @return value in [0,8]
      */
-    @VisibleForTesting
-    fun getStartIndexColumnByPosition(position: Int): Int = position
+    private fun getStartIndexColumnByPosition(position: Int): Int = position
 
     /**
      * compute the first index of grid with position
@@ -993,18 +970,16 @@ class SudokuViewModel : ViewModel() {
      * @param position in [0,8]
      * @return one value in this set {0, 3, 6, 27, 30, 33, 54, 57, 60}
      */
-    @VisibleForTesting
-    fun getStartIndexGridByPosition(position: Int): Int =
+    private fun getStartIndexGridByPosition(position: Int): Int =
         (3 * position) + (9 * 2 * (position / 3))
 
     /**
      * compute the first square index of row with position
      *
      * @param position in [0,8]
-     * @return one value in this set {0, 9, 18, 27, 36, 45, 54, 63, 72}
+     * @return one value in this set {0, 9, 18, 36, 45, 54, 63, 72}
      */
-    @VisibleForTesting
-    fun getStartIndexRowByPosition(position: Int): Int = position * 9
+    private fun getStartIndexRowByPosition(position: Int): Int = position * 9
 
     /**
      * compute the square index of row with startIndex & position
@@ -1012,8 +987,7 @@ class SudokuViewModel : ViewModel() {
      * @param startIndex in {0, 9, 18, 36, 45, 54, 63, 72}
      * @param position in [0,8]
      */
-    @VisibleForTesting
-    fun getIndexInRow(startIndex: Int, position: Int): Int = startIndex + position
+    private fun getIndexInRow(startIndex: Int, position: Int): Int = startIndex + position
 
     /**
      * compute index of column with startIndex & position
@@ -1021,8 +995,7 @@ class SudokuViewModel : ViewModel() {
      * @param startIndex in [0,8]
      * @param position in [0,8]
      */
-    @VisibleForTesting
-    fun getIndexInColumn(startIndex: Int, position: Int): Int = startIndex + position * 9
+    private fun getIndexInColumn(startIndex: Int, position: Int): Int = startIndex + position * 9
 
     /**
      * compute index in grid with startIndex & position
@@ -1030,8 +1003,7 @@ class SudokuViewModel : ViewModel() {
      * @param startIndex in {0, 3, 6, 27, 30, 33, 54, 57, 60}
      * @param position in [0,8]
      */
-    @VisibleForTesting
-    fun getIndexInGrid(startIndex: Int, position: Int): Int =
+    private fun getIndexInGrid(startIndex: Int, position: Int): Int =
         startIndex + (position % 3) + ((position / 3) * 9)
 
     /**
@@ -1039,24 +1011,21 @@ class SudokuViewModel : ViewModel() {
      * * if index is 70, return 63
      * @param index in  sudoku
      */
-    @VisibleForTesting
-    fun getStartIndexRow(index: Int) = (index / 9) * 9
+    private fun getStartIndexRow(index: Int) = (index / 9) * 9
 
     /**
      * compute first square index in column who contains index
      * * if index is 70, return 7
      * @param index in  sudoku
      */
-    @VisibleForTesting
-    fun getStartIndexColumn(index: Int) = index % 9
+    private fun getStartIndexColumn(index: Int) = index % 9
 
     /**
      * compute first square index in grid who contains index
      * * if index is 70, return 60
      * @param index in  sudoku
      */
-    @VisibleForTesting
-    fun getStartIndexGrid(index: Int): Int {
+    private fun getStartIndexGrid(index: Int): Int {
         val column = index % 9
         val row = index / 9
         return (column / 3) * 3 + ((row / 3) * 3) * 9
@@ -1067,8 +1036,7 @@ class SudokuViewModel : ViewModel() {
      * @param idGrid id of selected grid
      * @param idSquare id of selected square in the grid
      */
-    @VisibleForTesting
-    fun getIndex(idGrid: Int, idSquare: Int) =
+    private fun getIndex(idGrid: Int, idSquare: Int) =
         (3 * (idGrid % 3) + (idSquare % 3)) + (((idSquare / 3) + (idGrid / 3) * 3) * 9)
 
     /**
@@ -1076,8 +1044,7 @@ class SudokuViewModel : ViewModel() {
      * * if index is 70, return 8
      * @param index in  sudoku
      */
-    @VisibleForTesting
-    fun getIndexGrid(index: Int): Int {
+    private fun getIndexGrid(index: Int): Int {
         val indexGrid = getStartIndexGrid(index)
 
         return ((indexGrid % 9) / 3) + (indexGrid / 9)
@@ -1088,42 +1055,10 @@ class SudokuViewModel : ViewModel() {
      * if index is 70, return 4
      * @param index in  sudoku
      */
-    @VisibleForTesting
-    fun getIndexSquareInGrid(index: Int): Int {
+    private fun getIndexSquareInGrid(index: Int): Int {
         val indexRow = getStartIndexRow(index)
         val indexColumn = getStartIndexColumn(index)
 
         return (((indexRow / 9) % 3) * 3) + (indexColumn % 3)
     }
-
-    /**
-     * return squares who compose the grid at position idGrid
-     *
-     * @param idGrid in sudoku
-     * @return list of square data
-     */
-    @VisibleForTesting
-    fun getListSquareByIdGrid(idGrid: Int): MutableList<SquareData> {
-        val listSquareData = mutableListOf<SquareData>()
-        val startIndexGrid = getStartIndexGridByPosition(idGrid)
-        for (position in 0 until 9) {
-            val idSquare = getIndexInGrid(startIndexGrid, position)
-            listSquareData.add(sudokuData[idSquare])
-        }
-        return listSquareData
-    }
-
-    fun computeListSquareByIdGrid(idGrid: Int) {
-        state.postValue(SudokuState.RefreshTouchPad(getListSquareByIdGrid(idGrid)))
-    }
-
-    fun updateColor(idRes: Int) {
-        mIdColorRes = idRes
-    }
-
-    fun updateMode(@StateMode idMode: Int) {
-        mIdMode = idMode
-        Log.d("tom971", "updateMode $mIdMode")
-    }
-
 }
