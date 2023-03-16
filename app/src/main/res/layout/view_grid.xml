@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare1"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="1"
+        app:layout_constraintBottom_toTopOf="@id/gsquare4"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/gsquare2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare2"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="2"
+        app:layout_constraintBottom_toTopOf="@id/gsquare5"
+        app:layout_constraintLeft_toRightOf="@id/gsquare1"
+        app:layout_constraintRight_toLeftOf="@id/gsquare3"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare3"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="3"
+        app:layout_constraintBottom_toTopOf="@id/gsquare6"
+        app:layout_constraintLeft_toRightOf="@id/gsquare2"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare4"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="4"
+        app:layout_constraintBottom_toTopOf="@id/gsquare7"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/gsquare5"
+        app:layout_constraintTop_toBottomOf="@id/gsquare1" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare5"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="5"
+        app:layout_constraintBottom_toTopOf="@id/gsquare8"
+        app:layout_constraintLeft_toRightOf="@id/gsquare4"
+        app:layout_constraintRight_toLeftOf="@id/gsquare6"
+        app:layout_constraintTop_toBottomOf="@id/gsquare2" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare6"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="6"
+        app:layout_constraintBottom_toTopOf="@id/gsquare9"
+        app:layout_constraintLeft_toRightOf="@id/gsquare5"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gsquare3" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare7"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="7"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/gsquare8"
+        app:layout_constraintTop_toBottomOf="@id/gsquare4" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare8"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/gsquare7"
+        app:layout_constraintRight_toLeftOf="@id/gsquare9"
+        app:layout_constraintTop_toBottomOf="@id/gsquare5" />
+
+    <com.lconsulting.sudoku.ui.view.SquareView
+        android:id="@+id/gsquare9"
+        android:layout_width="@dimen/touchpad_square_size"
+        android:layout_height="@dimen/touchpad_square_size"
+        android:tag="9"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/gsquare8"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gsquare6" />
+
+</merge>

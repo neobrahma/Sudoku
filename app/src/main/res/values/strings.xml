@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Sudoku</string>
+
+    <string name="insert_value">Insère la valeur %1$d\n</string>
+    <string name="insert_a_value">Insérez une valeur\n</string>
+    <string name="one_value_by_square">La valeur %1$d est unique dans la cellule\nOn actualise la grille, ligne et colonne</string>
+    <string name="one_value_by_row">La valeur %1$d est unique dans la ligne\nOn actualise la grille et colonne</string>
+    <string name="one_value_by_column">La valeur %1$d est unique dans la colonne\nOn actualise la grille et ligne</string>
+    <string name="one_value_by_grid">La valeur %1$d est unique dans la grille\nOn actualise la ligne et colonne</string>
+    <string name="pair_found_grid">Le (%1$d,%2$d) est unique dans les 2 cellules pour cette grille\nOn actualise la grille</string>
+    <string name="pair_found_grid_column">Le (%1$d,%2$d) est unique dans les 2 cellules pour cette grille et colonne\nOn actualise la grille et colonne</string>
+    <string name="pair_found_grid_row">Le (%1$d,%2$d) est unique dans les 2 cellules pour cette grille et ligne\nOn actualise la grille et ligne</string>
+    <string name="pair_found_row">Le (%1$d,%2$d) est unique dans les 2 cellules de cette ligne\nOn actualise la ligne</string>
+    <string name="pair_found_coloumn">Le (%1$d,%2$d) est unique dans les 2 cellules de cette colonne\nOn actualise la colonne</string>
+    <string name="error_sudoku">Aucune proposition trouvée.\nInsérez une valeur</string>
+    <string name="intersection_column">%1$d est unique dans la colonne de cette grille\nOn actualise la colonne</string>
+    <string name="intersection_row">%1$d est unique dans la ligne de cette grille\nOn actualise la ligne</string>
+    <string name="success_sudoku">Sudoku résolu.\n</string>
+</resources>

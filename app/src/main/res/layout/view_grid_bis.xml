@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv1"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="0"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv2"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="1"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv3"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="2"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv4"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="3"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv5"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="4"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv6"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="5"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv7"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="6"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv8"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="7"/>
+
+    <com.lconsulting.sudoku.ui.view.SqareView
+        android:id="@+id/sv9"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/background_square"
+        android:tag="8"/>
+
+</merge>

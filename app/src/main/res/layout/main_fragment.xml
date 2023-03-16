@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.MainFragment">
+
+    <TextView
+        android:id="@+id/tvState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/insert_a_value"
+        app:layout_constraintBottom_toTopOf="@+id/sudoku"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="test" />
+
+    <com.lconsulting.sudoku.ui.view.SudokuView
+        android:id="@+id/sudoku"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_sudoku"
+        android:columnCount="3"
+        app:layout_constraintBottom_toTopOf="@+id/vTouchPad"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvState" />
+
+    <com.lconsulting.sudoku.ui.view.TouchPadMasterLevelView
+        android:id="@+id/vTouchPad"
+        android:layout_width="@dimen/touchpad_size"
+        android:layout_height="@dimen/touchpad_size"
+        app:layoutDescription="@xml/empty_scene"
+        app:layout_constraintBottom_toTopOf="@+id/llAction"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sudoku">
+
+        <com.lconsulting.sudoku.ui.view.TouchPadSubLevelView
+            android:id="@+id/subLevel"
+            android:layout_width="@dimen/touchpad_size"
+            android:layout_height="@dimen/touchpad_size"
+            app:layoutDescription="@xml/empty_scene">
+
+            <com.lconsulting.sudoku.ui.view.GridView
+                android:id="@+id/grid"
+                android:layout_width="@dimen/touchpad_size"
+                android:layout_height="@dimen/touchpad_size" />
+        </com.lconsulting.sudoku.ui.view.TouchPadSubLevelView>
+
+    </com.lconsulting.sudoku.ui.view.TouchPadMasterLevelView>
+
+    <GridLayout
+        android:id="@+id/llAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vTouchPad">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnPrevious"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:src="@drawable/baseline_skip_previous_black_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnPlay"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:src="@drawable/baseline_play_arrow_black_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnNext"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:src="@drawable/baseline_skip_next_black_24" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnRepeat"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:layout_column="1"
+            android:layout_gravity="center"
+            android:src="@drawable/baseline_repeat_black_24" />
+    </GridLayout>
+
+    <RadioGroup
+        android:id="@+id/rgColorChoice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/vTouchPad"
+        app:layout_constraintEnd_toStartOf="@+id/vTouchPad"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/vTouchPad">
+
+        <RadioButton
+            android:id="@+id/cb_default"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:button="@drawable/selector_value1"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/cb_find"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:button="@drawable/selector_value2" />
+
+        <RadioButton
+            android:id="@+id/cb_possibility"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:button="@drawable/selector_value3" />
+    </RadioGroup>
+
+    <RadioGroup
+        android:id="@+id/rgModeChoice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/vTouchPad"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/vTouchPad"
+        app:layout_constraintTop_toTopOf="@+id/vTouchPad">
+
+        <RadioButton
+            android:id="@+id/cb_modify_value"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:button="@drawable/selector_value"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/cb_light_value"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:button="@drawable/selector_light" />
+
+        <RadioButton
+            android:id="@+id/cb_modify_possibility"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
+            android:button="@drawable/selector_possibility" />
+    </RadioGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
